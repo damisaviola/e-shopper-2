@@ -27,8 +27,8 @@ class Adminpanel extends CI_Controller {
 	
 		if ($user) { 
 			$data_session = array(
-				'idAdmin' => $user->idAdmin, // Menyimpan idAdmin juga bisa bermanfaat
-				'userName' => $user->userName, // Simpan userName dari database
+				'idAdmin' => $user->idAdmin, 
+				'userName' => $user->userName,
 				'status' => 'login'
 			);
 			$this->session->set_userdata($data_session);

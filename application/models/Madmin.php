@@ -86,6 +86,102 @@ class Madmin extends CI_Model{
         return $query->row_array();
     }
 
+	public function getProductsByCategory($idKat) {
+		// Query untuk mengambil produk berdasarkan kategori yang sama
+		$this->db->where('idKat', $idKat);
+		$query = $this->db->get('tbl_produk'); // Sesuaikan dengan nama tabel
+		return $query->result();
+	}
+	
+	public function recommend($id) {
+        // Ambil produk yang dipilih berdasarkan 'idProduk'
+        $selectedProduct = $this->getProductById($id);
+        $allProducts = $this->getAllProducts();
+
+        // Mengubah deskripsi produk yang dipilih menjadi vektor kata-kata
+        $selectedVector = $this->textToVector($selectedProduct->deskripsiProduk);
+
+        // Variabel untuk menyimpan skor kesamaan antara produk yang dipilih dan produk lainnya
+        $similarityScores = [];
+
+        // Iterasi melalui semua produk
+        foreach ($allProducts as $product) {
+            // Lewatkan produk yang sedang dipilih (tidak dibandingkan dengan dirinya sendiri)
+            if ($product->idProduk != $selectedProduct->idProduk) {
+                // Ubah deskripsi produk lain menjadi vektor kata-kata
+                $productVector = $this->textToVector($product->deskripsiProduk);
+
+                // Hitung cosine similarity antara deskripsi produk yang dipilih dan produk lain
+                $similarityScores[$product->idProduk] = $this->cosineSimilarity($selectedVector, $productVector);
+            }
+        }
+
+        // Urutkan produk berdasarkan skor cosine similarity dari yang tertinggi ke terendah
+        arsort($similarityScores);
+
+        // Buat array untuk menyimpan produk yang direkomendasikan
+        $recommendedProducts = [];
+
+        // Ambil produk berdasarkan skor kesamaan
+        foreach ($similarityScores as $productId => $score) {
+            $recommendedProducts[] = $this->getProductById($productId);
+        }
+
+        return $recommendedProducts;
+    }
+
+    // Fungsi untuk menghitung Cosine Similarity antara dua vektor
+    public function cosineSimilarity($vec1, $vec2) {
+        $dotProduct = 0;  // Variabel untuk menyimpan hasil perkalian vektor
+        $normVec1 = 0;    // Variabel untuk menyimpan panjang (norma) vektor pertama
+        $normVec2 = 0;    // Variabel untuk menyimpan panjang (norma) vektor kedua
+
+        // Menghitung dot product dan norma vektor pertama
+        foreach ($vec1 as $key => $value) {
+            if (isset($vec2[$key])) {
+                $dotProduct += $value * $vec2[$key];  // Hitung dot product
+            }
+            $normVec1 += $value * $value;  // Hitung norma vektor pertama
+        }
+
+        // Menghitung norma vektor kedua
+        foreach ($vec2 as $value) {
+            $normVec2 += $value * $value;  // Hitung norma vektor kedua
+        }
+
+        // Jika salah satu norma vektor nol, kembalikan 0 (tidak ada kemiripan)
+        if ($normVec1 == 0 || $normVec2 == 0) {
+            return 0;
+        }
+
+        // Kembalikan nilai cosine similarity
+        return $dotProduct / (sqrt($normVec1) * sqrt($normVec2));
+    }
+
+    // Fungsi untuk mengubah teks menjadi vektor kata-kata
+    public function textToVector($text) {
+        // Hapus tanda baca dan ubah teks menjadi huruf kecil
+        $text = preg_replace('/[^\p{L}\p{N}\s]/u', '', strtolower($text));
+        
+        // Memisahkan teks menjadi array kata-kata berdasarkan spasi
+        $terms = explode(' ', $text);
+        
+        // Menghitung frekuensi setiap kata dalam teks (mirip dengan bag-of-words model)
+        return array_count_values($terms);
+    }
+
+    // Fungsi untuk mendapatkan produk berdasarkan ID
+    public function getProductById($id) {
+        return $this->db->get_where('tbl_produk', ['idProduk' => $id])->row();
+    }
+
+    // Fungsi untuk mendapatkan semua produk
+    public function getAllProducts() {
+        return $this->db->get('tbl_produk')->result();
+    }
+
+
+
 	public function get_reviews_by_product($idProduk)
 {
     $this->db->where('idProduk', $idProduk);

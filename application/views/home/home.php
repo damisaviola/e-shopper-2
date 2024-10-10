@@ -38,7 +38,8 @@
                     <img class="img-fluid w-100" src="<?php echo base_url('assets/foto_produk/'.$val->foto); ?>" alt="">
                 </div>
                 <div class="card-body border-left border-right text-center p-0 pt-4 pb-3">
-                    <h6 class="text-truncate mb-3"><?php echo $val->namaProduk; ?></h6>
+                <h6 class="mb-3" style="word-break: break-word;"><?php echo $val->namaProduk; ?></h6>
+
                     <div class="d-flex justify-content-center">
                     <h6>Rp <?php echo number_format($val->harga, 0, ',', '.'); ?></h6>
                     </div>
@@ -67,6 +68,17 @@ if(isset($city['rajaongkir']['results']['city_name']) && isset($city['rajaongkir
         </div>
     <?php } ?>
 </div>
+
+<style>
+  
+    .nama-produk {
+        word-break: break-word;
+    }
+</style>
+
+
+
+</style>
 
     <!-- Products End -->
 

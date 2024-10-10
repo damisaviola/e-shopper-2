@@ -144,22 +144,29 @@ public function save() {
 	
 	
 
-	public function detail_produk($idProduk)
-	{
-		$idKonsumen = $this->session->userdata('idKonsumen');
-		$dataWhere = array('idKonsumen' => $idKonsumen);
-		$this->db->where('idKonsumen', $idKonsumen);
-		$data['member'] = $this->Madmin->get_by_id('tbl_member', $dataWhere)->row();	
-		$dataWhere = array('idProduk' =>$idProduk);
-		$data['product'] = $this->Madmin->get_product_by_id($idProduk);
-		$data['produk1']=$this->Madmin->get_produk()->result();
-		$data['produk']=$this->Madmin->get_by_id('tbl_produk', $dataWhere)->row_object();
-		$data['kategori']=$this->Madmin->get_all_data('tbl_kategori')->result();
-		$data['reviews'] = $this->Madmin->get_reviews_by_product($idProduk);
-		$this->load->view('home/layout/header', $data);
-		$this->load->view('home/detail_produk', $data);
-		$this->load->view('home/layout/footer');
-	}
+	public function detail_produk($idProduk) {
+        $idKonsumen = $this->session->userdata('idKonsumen');
+        $dataWhere = array('idKonsumen' => $idKonsumen);
+        $this->db->where('idKonsumen', $idKonsumen);
+        $data['member'] = $this->Madmin->get_by_id('tbl_member', $dataWhere)->row();    
+
+        // Ambil detail produk
+        $dataWhere = array('idProduk' => $idProduk);
+        $data['product'] = $this->Madmin->get_product_by_id($idProduk);
+        $data['produk1'] = $this->Madmin->get_produk()->result(); // Ambil semua produk
+        $data['produk'] = $this->Madmin->get_by_id('tbl_produk', $dataWhere)->row_object();
+        $data['kategori'] = $this->Madmin->get_all_data('tbl_kategori')->result();
+        $data['reviews'] = $this->Madmin->get_reviews_by_product($idProduk);
+
+        // Ambil rekomendasi produk berdasarkan idProduk dari fungsi recommend di produk.php
+        $data['recommendedProducts'] = $this->Madmin->recommend($idProduk);
+
+        // Load view
+        $this->load->view('home/layout/header', $data);
+        $this->load->view('home/detail_produk', $data);
+        $this->load->view('home/layout/footer');
+    }
+
 
 	public function submit_review() {
 		

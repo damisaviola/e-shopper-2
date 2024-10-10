@@ -52,6 +52,85 @@ public function get_by_id($idProduk){
 	$this->load->view('home/layout/footer');
 }
 
+// Fungsi untuk menghitung Cosine Similarity antara dua vektor
+function cosineSimilarity($vec1, $vec2) {
+    $dotProduct = 0;  
+    $normVec1 = 0;    
+    $normVec2 = 0;    
+
+    // Menghitung dot product dan norma vektor pertama
+    foreach ($vec1 as $key => $value) {
+        if (isset($vec2[$key])) {
+            $dotProduct += $value * $vec2[$key];  
+        }
+        $normVec1 += $value * $value;  
+    }
+
+    
+    foreach ($vec2 as $value) {
+        $normVec2 += $value * $value;  
+    }
+
+   
+    if ($normVec1 == 0 || $normVec2 == 0) {
+        return 0;
+    }
+
+    
+    return $dotProduct / (sqrt($normVec1) * sqrt($normVec2));
+}
+
+
+
+function textToVector($text) {
+  
+    $text = preg_replace('/[^\p{L}\p{N}\s]/u', '', strtolower($text));
+    
+    
+    $terms = explode(' ', $text);
+    
+    
+    return array_count_values($terms);
+}
+
+public function recommend($id) {
+    
+    $selectedProduct = $this->Madmin->getProductById($id);
+
+  
+    $allProducts = $this->Madmin->getAllProducts();
+
+    
+    $selectedVector = $this->textToVector($selectedProduct->deskripsiProduk);
+
+ 
+    $similarityScores = [];
+
+  
+    foreach ($allProducts as $product) {
+       
+        if ($product->idProduk != $selectedProduct->idProduk) {
+        
+            $productVector = $this->textToVector($product->deskripsiProduk);
+
+         
+            $similarityScores[$product->idProduk] = $this->cosineSimilarity($selectedVector, $productVector);
+        }
+    }
+
+    
+    arsort($similarityScores);
+
+ 
+    echo '<pre>';
+    print_r($similarityScores);
+    echo '</pre>';
+
+	
+}
+
+
+
 public function save(){
 	$idToko=$this->input->post('idToko');
 	$idKategori = $this->input->post('kategori');
