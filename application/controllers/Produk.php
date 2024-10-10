@@ -52,13 +52,13 @@ public function get_by_id($idProduk){
 	$this->load->view('home/layout/footer');
 }
 
-// Fungsi untuk menghitung Cosine Similarity antara dua vektor
+
 function cosineSimilarity($vec1, $vec2) {
     $dotProduct = 0;  
     $normVec1 = 0;    
     $normVec2 = 0;    
 
-    // Menghitung dot product dan norma vektor pertama
+  
     foreach ($vec1 as $key => $value) {
         if (isset($vec2[$key])) {
             $dotProduct += $value * $vec2[$key];  
